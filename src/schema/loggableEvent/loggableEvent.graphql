@@ -138,13 +138,6 @@ input DeleteLoggableEventMutationInput {
     id: ID!
 }
 
-extend type Query {
-    """
-    Get all loggable events for the authenticated user
-    """
-    loggableEventsForUser: [LoggableEvent!]!
-}
-
 extend type Mutation {
     """
     Create a new loggable event for the authenticated user

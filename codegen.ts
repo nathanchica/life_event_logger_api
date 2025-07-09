@@ -1,3 +1,4 @@
+import { DateTimeISOResolver } from 'graphql-scalars';
 import type { CodegenConfig } from '@graphql-codegen/cli';
 
 const config: CodegenConfig = {
@@ -15,7 +16,7 @@ const config: CodegenConfig = {
                     EventLabel: '@prisma/client#EventLabel as PrismaEventLabel'
                 },
                 scalars: {
-                    DateTime: 'Date'
+                    DateTime: DateTimeISOResolver.extensions.codegenScalarType
                 }
             }
         }

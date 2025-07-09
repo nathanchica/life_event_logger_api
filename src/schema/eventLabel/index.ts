@@ -34,16 +34,6 @@ function formatZodError(error: z.ZodError) {
 }
 
 const resolvers: Resolvers<GraphQLContext> = {
-    Query: {
-        eventLabelsForUser: async (_, { userId }, { user, prisma }) => {
-            if (!user) throw new Error('Not authenticated');
-
-            return prisma.eventLabel.findMany({
-                where: { userId }
-            });
-        }
-    },
-
     Mutation: {
         createEventLabel: async (_, { input }, { user, prisma }) => {
             if (!user) {

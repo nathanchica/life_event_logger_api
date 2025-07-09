@@ -108,13 +108,6 @@ input DeleteEventLabelMutationInput {
     id: ID!
 }
 
-extend type Query {
-    """
-    Get all event labels for a specific user
-    """
-    eventLabelsForUser(userId: ID!): [EventLabel!]!
-}
-
 extend type Mutation {
     """
     Create a new event label for the authenticated user

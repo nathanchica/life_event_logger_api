@@ -22,7 +22,7 @@ export type Scalars = {
     Int: { input: number; output: number };
     Float: { input: number; output: number };
     /** ISO 8601 compliant date-time scalar */
-    DateTime: { input: Date; output: Date };
+    DateTime: { input: Date | string; output: Date | string };
 };
 
 /** Input for creating a new event label */
@@ -186,17 +186,8 @@ export type MutationUpdateLoggableEventArgs = {
 /** Root type for GraphQL queries */
 export type Query = {
     __typename?: 'Query';
-    /** Get all event labels for a specific user */
-    eventLabelsForUser: Array<EventLabel>;
-    /** Get all loggable events for the authenticated user */
-    loggableEventsForUser: Array<LoggableEvent>;
     /** Get the currently authenticated user's profile */
     user?: Maybe<User>;
-};
-
-/** Root type for GraphQL queries */
-export type QueryEventLabelsForUserArgs = {
-    userId: Scalars['ID']['input'];
 };
 
 /** Input for updating an existing event label */
@@ -540,13 +531,6 @@ export type QueryResolvers<
     ContextType = GraphQLContext,
     ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']
 > = ResolversObject<{
-    eventLabelsForUser?: Resolver<
-        Array<ResolversTypes['EventLabel']>,
-        ParentType,
-        ContextType,
-        RequireFields<QueryEventLabelsForUserArgs, 'userId'>
-    >;
-    loggableEventsForUser?: Resolver<Array<ResolversTypes['LoggableEvent']>, ParentType, ContextType>;
     user?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
 }>;
 

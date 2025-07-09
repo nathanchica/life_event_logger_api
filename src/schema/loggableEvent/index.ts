@@ -38,17 +38,6 @@ function formatZodError(error: z.ZodError) {
 }
 
 const resolvers: Resolvers = {
-    Query: {
-        loggableEventsForUser: async (_, __, { user, prisma }) => {
-            if (!user) throw new Error('Not authenticated');
-
-            return prisma.loggableEvent.findMany({
-                where: { userId: user.id },
-                include: { labels: true }
-            });
-        }
-    },
-
     Mutation: {
         createLoggableEvent: async (_, { input }, { user, prisma }) => {
             if (!user) {
