@@ -22,7 +22,8 @@ const CreateLoggableEventSchema = z.object({
 const UpdateLoggableEventSchema = z.object({
     id: z.string().min(1, 'ID is required'),
     name: z.string().min(1, 'Name cannot be empty').max(25, 'Name must be under 25 characters').optional(),
-    warningThresholdInDays: z.number().int().min(0, 'Warning threshold must be a positive number').optional()
+    warningThresholdInDays: z.number().int().min(0, 'Warning threshold must be a positive number').optional(),
+    dateTimeRecords: z.array(z.date()).optional()
 });
 
 const DeleteLoggableEventSchema = z.object({
@@ -125,6 +126,9 @@ const resolvers: Resolvers = {
                         ...(validatedInput.name ? { name: validatedInput.name } : {}),
                         ...(validatedInput.warningThresholdInDays !== undefined
                             ? { warningThresholdInDays: validatedInput.warningThresholdInDays }
+                            : {}),
+                        ...(validatedInput.dateTimeRecords !== undefined
+                            ? { dateTimeRecords: validatedInput.dateTimeRecords }
                             : {})
                     },
                     include: { labels: true }

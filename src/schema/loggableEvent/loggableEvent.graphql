@@ -126,6 +126,11 @@ input UpdateLoggableEventMutationInput {
     Number of days since the last event record before a warning will show for this event
     """
     warningThresholdInDays: Int
+
+    """
+    Array of timestamps for this event
+    """
+    dateTimeRecords: [DateTime!]
 }
 
 """

@@ -70,11 +70,13 @@
         "vercel": "^44.2.13"
     },
     "lint-staged": {
-        "*.{ts,js,graphql}": [
+        "*.{ts,js}": [
             "eslint --fix",
             "prettier --write"
         ],
         "*.graphql": [
+            "eslint --fix",
+            "prettier --write",
             "npm run codegen"
         ],
         "*.{json,md}": [
