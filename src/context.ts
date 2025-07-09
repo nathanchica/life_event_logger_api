@@ -1,11 +1,19 @@
-import { prisma } from './prisma/client';
+import { PrismaClient } from '@prisma/client';
+
 import { verifyGoogleToken } from './auth/verifyToken';
+import { prisma } from './prisma/client';
+import { UserParent } from './schema/user';
 
 type RequestWithHeaders = {
     headers: {
         get: (key: string) => string | null;
     };
 };
+
+export interface GraphQLContext {
+    user: UserParent | null;
+    prisma: PrismaClient;
+}
 
 export async function createContext({ request }: { request: RequestWithHeaders }) {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');

@@ -1,41 +1,24 @@
-import { loadFilesSync } from '@graphql-tools/load-files';
-import { mergeTypeDefs, mergeResolvers } from '@graphql-tools/merge';
-import { GraphQLScalarType, Kind } from 'graphql';
-import { makeExecutableSchema } from '@graphql-tools/schema';
 import { join } from 'path';
 
-import userResolvers from './user/resolvers';
-import loggableEventResolvers from './loggableEvent/resolvers';
+import { loadFilesSync } from '@graphql-tools/load-files';
+import { mergeTypeDefs, mergeResolvers } from '@graphql-tools/merge';
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import { DateTimeISOTypeDefinition, DateTimeISOResolver } from 'graphql-scalars';
 
-const DateTimeScalar = new GraphQLScalarType({
-    name: 'DateTime',
-    description: 'ISO 8601 compliant date-time scalar',
-    serialize: (value: any) => {
-        if (value instanceof Date) {
-            return value.toISOString();
-        }
-        return new Date(value).toISOString();
-    },
-    parseValue: (value: any) => {
-        return new Date(value);
-    },
-    parseLiteral: (ast) => {
-        if (ast.kind === Kind.STRING) {
-            return new Date(ast.value);
-        }
-        return null;
-    }
-});
+import eventLabelResolvers from './eventLabel';
+import loggableEventResolvers from './loggableEvent';
+import userResolvers from './user';
 
 const typesArray = loadFilesSync(join(__dirname, './**/*.graphql'));
 
-export const typeDefs = mergeTypeDefs(typesArray);
+export const typeDefs = mergeTypeDefs([DateTimeISOTypeDefinition, ...typesArray]);
 export const resolvers = mergeResolvers([
     {
-        DateTime: DateTimeScalar
+        DateTime: DateTimeISOResolver
     },
     userResolvers,
-    loggableEventResolvers
+    loggableEventResolvers,
+    eventLabelResolvers
 ]);
 
 const schema = makeExecutableSchema({

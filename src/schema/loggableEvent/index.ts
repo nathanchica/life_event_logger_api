@@ -1,13 +1,28 @@
 import { z } from 'zod';
 
+import { Resolvers } from '../../generated/graphql';
+import { UserParent } from '../user';
+
+export type LoggableEventParent = {
+    id?: string;
+    name?: string;
+    dateTimeRecords?: Array<Date>;
+    warningThresholdInDays?: number;
+    user?: UserParent;
+    createdAt?: Date;
+    updatedAt?: Date;
+};
+
 const CreateLoggableEventSchema = z.object({
-    name: z.string().min(1, 'Name is required').max(25, 'Name must be under 25 characters'),
+    name: z.string().min(1, 'Name cannot be empty').max(25, 'Name must be under 25 characters'),
+    warningThresholdInDays: z.number().int().min(0, 'Warning threshold must be a positive number'),
     labelIds: z.array(z.string()).optional()
 });
 
 const UpdateLoggableEventSchema = z.object({
     id: z.string().min(1, 'ID is required'),
-    name: z.string().min(1, 'Name is required').max(25, 'Name must be under 25 characters').optional()
+    name: z.string().min(1, 'Name cannot be empty').max(25, 'Name must be under 25 characters').optional(),
+    warningThresholdInDays: z.number().int().min(0, 'Warning threshold must be a positive number').optional()
 });
 
 const DeleteLoggableEventSchema = z.object({
@@ -22,9 +37,9 @@ function formatZodError(error: z.ZodError) {
     }));
 }
 
-const resolvers = {
+const resolvers: Resolvers = {
     Query: {
-        loggableEventsForUser: async (_: any, __: any, { user, prisma }: any) => {
+        loggableEventsForUser: async (_, __, { user, prisma }) => {
             if (!user) throw new Error('Not authenticated');
 
             return prisma.loggableEvent.findMany({
@@ -35,7 +50,7 @@ const resolvers = {
     },
 
     Mutation: {
-        createLoggableEvent: async (_: any, { input }: any, { user, prisma }: any) => {
+        createLoggableEvent: async (_, { input }, { user, prisma }) => {
             if (!user) {
                 return {
                     loggableEvent: null,
@@ -49,6 +64,7 @@ const resolvers = {
                 const event = await prisma.loggableEvent.create({
                     data: {
                         name: validatedInput.name,
+                        warningThresholdInDays: validatedInput.warningThresholdInDays,
                         userId: user.id,
                         dateTimeRecords: [],
                         labels: validatedInput.labelIds
@@ -79,7 +95,7 @@ const resolvers = {
             }
         },
 
-        updateLoggableEvent: async (_: any, { input }: any, { user, prisma }: any) => {
+        updateLoggableEvent: async (_, { input }, { user, prisma }) => {
             if (!user) {
                 return {
                     loggableEvent: null,
@@ -90,14 +106,14 @@ const resolvers = {
             try {
                 const validatedInput = UpdateLoggableEventSchema.parse(input);
 
-                const updateData: any = {};
-                if (validatedInput.name) {
-                    updateData.name = validatedInput.name;
-                }
-
                 const event = await prisma.loggableEvent.update({
                     where: { id: validatedInput.id, userId: user.id },
-                    data: updateData,
+                    data: {
+                        ...(validatedInput.name ? { name: validatedInput.name } : {}),
+                        ...(validatedInput.warningThresholdInDays !== undefined
+                            ? { warningThresholdInDays: validatedInput.warningThresholdInDays }
+                            : {})
+                    },
                     include: { labels: true }
                 });
 
@@ -120,7 +136,7 @@ const resolvers = {
             }
         },
 
-        deleteLoggableEvent: async (_: any, { input }: any, { user, prisma }: any) => {
+        deleteLoggableEvent: async (_, { input }, { user, prisma }) => {
             if (!user) {
                 return {
                     loggableEvent: null,
@@ -157,12 +173,16 @@ const resolvers = {
     },
 
     LoggableEvent: {
-        user: async (parent: any, _: any, { prisma }: any) => {
-            return prisma.user.findUnique({
+        user: async (parent, _, { prisma }) => {
+            const user = await prisma.user.findUnique({
                 where: { id: parent.userId }
             });
+            if (!user) {
+                throw new Error(`User not found for LoggableEvent ${parent.id}`);
+            }
+            return user;
         },
-        labels: async (parent: any, _: any, { prisma }: any) => {
+        labels: async (parent, _, { prisma }) => {
             return prisma.eventLabel.findMany({
                 where: {
                     loggableEvents: {
