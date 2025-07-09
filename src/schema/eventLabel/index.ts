@@ -93,13 +93,37 @@ const resolvers: Resolvers<GraphQLContext> = {
             try {
                 const validatedInput = UpdateEventLabelSchema.parse(input);
 
+                const existingLabel = await prisma.eventLabel.findUnique({
+                    where: { id: validatedInput.id }
+                });
+
+                if (!existingLabel) {
+                    return {
+                        eventLabel: null,
+                        errors: [{ code: 'NOT_FOUND', field: 'id', message: 'Event label not found' }]
+                    };
+                }
+
+                if (existingLabel.userId !== user.id) {
+                    return {
+                        eventLabel: null,
+                        errors: [
+                            {
+                                code: 'FORBIDDEN',
+                                field: null,
+                                message: 'You do not have permission to update this event label'
+                            }
+                        ]
+                    };
+                }
+
                 const updateData: { name?: string } = {};
                 if (validatedInput.name) {
                     updateData.name = validatedInput.name;
                 }
 
                 const label = await prisma.eventLabel.update({
-                    where: { id: validatedInput.id, userId: user.id },
+                    where: { id: validatedInput.id },
                     data: updateData
                 });
 
@@ -133,8 +157,32 @@ const resolvers: Resolvers<GraphQLContext> = {
             try {
                 const validatedInput = DeleteEventLabelSchema.parse(input);
 
+                const existingLabel = await prisma.eventLabel.findUnique({
+                    where: { id: validatedInput.id }
+                });
+
+                if (!existingLabel) {
+                    return {
+                        eventLabel: null,
+                        errors: [{ code: 'NOT_FOUND', field: 'id', message: 'Event label not found' }]
+                    };
+                }
+
+                if (existingLabel.userId !== user.id) {
+                    return {
+                        eventLabel: null,
+                        errors: [
+                            {
+                                code: 'FORBIDDEN',
+                                field: null,
+                                message: 'You do not have permission to delete this event label'
+                            }
+                        ]
+                    };
+                }
+
                 const label = await prisma.eventLabel.delete({
-                    where: { id: validatedInput.id, userId: user.id }
+                    where: { id: validatedInput.id }
                 });
 
                 return {

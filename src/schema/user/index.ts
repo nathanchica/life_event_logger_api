@@ -26,6 +26,11 @@ const resolvers: Resolvers = {
                 where: { userId: parent.id },
                 include: { labels: true }
             });
+        },
+        eventLabels: async (parent, _, { prisma }) => {
+            return prisma.eventLabel.findMany({
+                where: { userId: parent.id }
+            });
         }
     }
 };

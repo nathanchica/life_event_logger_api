@@ -106,8 +106,32 @@ const resolvers: Resolvers = {
             try {
                 const validatedInput = UpdateLoggableEventSchema.parse(input);
 
+                const existingEvent = await prisma.loggableEvent.findUnique({
+                    where: { id: validatedInput.id }
+                });
+
+                if (!existingEvent) {
+                    return {
+                        loggableEvent: null,
+                        errors: [{ code: 'NOT_FOUND', field: 'id', message: 'Loggable event not found' }]
+                    };
+                }
+
+                if (existingEvent.userId !== user.id) {
+                    return {
+                        loggableEvent: null,
+                        errors: [
+                            {
+                                code: 'FORBIDDEN',
+                                field: null,
+                                message: 'You do not have permission to update this loggable event'
+                            }
+                        ]
+                    };
+                }
+
                 const event = await prisma.loggableEvent.update({
-                    where: { id: validatedInput.id, userId: user.id },
+                    where: { id: validatedInput.id },
                     data: {
                         ...(validatedInput.name ? { name: validatedInput.name } : {}),
                         ...(validatedInput.warningThresholdInDays !== undefined
@@ -147,8 +171,32 @@ const resolvers: Resolvers = {
             try {
                 const validatedInput = DeleteLoggableEventSchema.parse(input);
 
+                const existingEvent = await prisma.loggableEvent.findUnique({
+                    where: { id: validatedInput.id }
+                });
+
+                if (!existingEvent) {
+                    return {
+                        loggableEvent: null,
+                        errors: [{ code: 'NOT_FOUND', field: 'id', message: 'Loggable event not found' }]
+                    };
+                }
+
+                if (existingEvent.userId !== user.id) {
+                    return {
+                        loggableEvent: null,
+                        errors: [
+                            {
+                                code: 'FORBIDDEN',
+                                field: null,
+                                message: 'You do not have permission to delete this loggable event'
+                            }
+                        ]
+                    };
+                }
+
                 const event = await prisma.loggableEvent.delete({
-                    where: { id: validatedInput.id, userId: user.id },
+                    where: { id: validatedInput.id },
                     include: { labels: true }
                 });
 
