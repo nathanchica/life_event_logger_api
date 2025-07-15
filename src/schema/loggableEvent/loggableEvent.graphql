@@ -15,7 +15,7 @@ type LoggableEvent {
     """
     Array of timestamps when this event occurred
     """
-    dateTimeRecords: [DateTime!]!
+    timestamps: [DateTime!]!
 
     """
     Number of days since the last event record before a warning will show for this event
@@ -130,7 +130,7 @@ input UpdateLoggableEventMutationInput {
     """
     Array of timestamps for this event
     """
-    dateTimeRecords: [DateTime!]
+    timestamps: [DateTime!]
 }
 
 """
