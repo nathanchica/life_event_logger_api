@@ -33,7 +33,7 @@ Response payload for creating an event label
 """
 type CreateEventLabelMutationPayload {
     """
-    Temporary ID for the event, used before creation.
+    Temporary ID for the label, used before creation.
     """
     tempID: ID
 
