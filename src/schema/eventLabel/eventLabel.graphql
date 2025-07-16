@@ -83,7 +83,7 @@ Input for creating a new event label
 """
 input CreateEventLabelMutationInput {
     """
-    Temporary ID for the event, used before creation. Will be replaced with the actual ID after creation.
+    Temporary ID for the label, used before creation. Will be replaced with the actual ID after creation.
     """
     id: ID!
 
