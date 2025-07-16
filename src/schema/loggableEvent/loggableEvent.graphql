@@ -48,6 +48,11 @@ Response payload for creating a loggable event
 """
 type CreateLoggableEventMutationPayload {
     """
+    Temporary ID for the event, used before creation.
+    """
+    tempID: ID
+
+    """
     The created loggable event, null if creation failed
     """
     loggableEvent: LoggableEvent
@@ -92,6 +97,11 @@ type DeleteLoggableEventMutationPayload {
 Input for creating a new loggable event
 """
 input CreateLoggableEventMutationInput {
+    """
+    Temporary ID for the event, used before creation. Will be replaced with the actual ID after creation.
+    """
+    id: ID!
+
     """
     Name for the event (max 25 characters, cannot be empty)
     """

@@ -55,18 +55,21 @@ const resolvers: Resolvers = {
                 });
 
                 return {
+                    tempID: input.id, // Return the temporary ID
                     loggableEvent: event,
                     errors: []
                 };
             } catch (error) {
                 if (error instanceof z.ZodError) {
                     return {
+                        tempID: null,
                         loggableEvent: null,
                         errors: formatZodError(error)
                     };
                 }
 
                 return {
+                    tempID: null,
                     loggableEvent: null,
                     errors: [{ code: 'INTERNAL_ERROR', field: null, message: 'Something went wrong' }]
                 };
