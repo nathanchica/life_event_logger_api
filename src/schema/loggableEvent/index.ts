@@ -65,7 +65,7 @@ const updateLoggableEventHelper = async (
     try {
         // Process timestamps if they are being updated
         if (updateData.timestamps && Array.isArray(updateData.timestamps)) {
-            updateData.timestamps = processTimestamps(updateData.timestamps as Date[]);
+            updateData.timestamps = { set: processTimestamps(updateData.timestamps as Date[]) };
         }
 
         const event = await prisma.loggableEvent.update({
@@ -248,8 +248,20 @@ const resolvers: Resolvers = {
                     };
                 }
 
-                // Remove the timestamp from existing ones
+                // Check if the timestamp exists before removing
                 const timestampToRemove = validatedInput.timestamp.getTime();
+                const timestampExists = currentEvent.timestamps.some(
+                    (timestamp: Date) => timestamp.getTime() === timestampToRemove
+                );
+
+                if (!timestampExists) {
+                    return {
+                        loggableEvent: null,
+                        errors: [{ code: 'NOT_FOUND', field: 'timestamp', message: 'Timestamp not found' }]
+                    };
+                }
+
+                // Remove the timestamp from existing ones
                 const updatedTimestamps = currentEvent.timestamps.filter(
                     (timestamp: Date) => timestamp.getTime() !== timestampToRemove
                 );
