@@ -86,7 +86,8 @@ const resolvers: Resolvers = {
         loggableEvents: async (parent, _, { prisma }) => {
             return prisma.loggableEvent.findMany({
                 where: { userId: parent.id },
-                include: { labels: true }
+                include: { labels: true },
+                orderBy: { createdAt: 'desc' }
             });
         },
         eventLabels: async (parent, _, { prisma }) => {
