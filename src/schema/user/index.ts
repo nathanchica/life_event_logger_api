@@ -92,7 +92,8 @@ const resolvers: Resolvers = {
         },
         eventLabels: async (parent, _, { prisma }) => {
             return prisma.eventLabel.findMany({
-                where: { userId: parent.id }
+                where: { userId: parent.id },
+                orderBy: { createdAt: 'asc' }
             });
         }
     }
