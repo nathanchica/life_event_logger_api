@@ -12,10 +12,3 @@ export const createMockEventLabel = (overrides?: Partial<EventLabel>): EventLabe
         ...overrides
     };
 };
-
-export const createMockEventLabelWithDefaults = (userId: string, overrides?: Partial<EventLabel>): EventLabel => {
-    return createMockEventLabel({
-        userId,
-        ...overrides
-    });
-};
