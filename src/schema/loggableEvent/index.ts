@@ -7,6 +7,8 @@ import { Resolvers } from '../../generated/graphql.js';
 import { formatZodError } from '../../utils/validation.js';
 import { UserParent } from '../user/index.js';
 
+export const MAX_EVENT_NAME_LENGTH = 25;
+
 export type LoggableEventParent = {
     id?: string;
     name?: string;
@@ -18,27 +20,24 @@ export type LoggableEventParent = {
 };
 
 const CreateLoggableEventSchema = z.object({
-    name: z.string().min(1, 'Name cannot be empty').max(25, 'Name must be under 25 characters'),
+    name: z
+        .string()
+        .min(1, 'Name cannot be empty')
+        .max(MAX_EVENT_NAME_LENGTH, `Name must be under ${MAX_EVENT_NAME_LENGTH} characters`),
     warningThresholdInDays: z.number().int().min(0, 'Warning threshold must be a positive number'),
     labelIds: z.array(z.string()).optional()
 });
 
 const UpdateLoggableEventSchema = z.object({
     id: z.string().min(1, 'ID is required'),
-    name: z.string().min(1, 'Name cannot be empty').max(25, 'Name must be under 25 characters').optional(),
+    name: z
+        .string()
+        .min(1, 'Name cannot be empty')
+        .max(MAX_EVENT_NAME_LENGTH, `Name must be under ${MAX_EVENT_NAME_LENGTH} characters`)
+        .optional(),
     warningThresholdInDays: z.number().int().min(0, 'Warning threshold must be a positive number').optional(),
     timestamps: z.array(z.date()).optional(),
     labelIds: z.array(z.string()).optional()
-});
-
-const AddTimestampToEventSchema = z.object({
-    id: z.string().min(1, 'Event ID is required'),
-    timestamp: z.date()
-});
-
-const RemoveTimestampFromEventSchema = z.object({
-    id: z.string().min(1, 'Event ID is required'),
-    timestamp: z.date()
 });
 
 /**
@@ -280,11 +279,6 @@ const resolvers: Resolvers = {
                     };
                 }
 
-                if (error instanceof GraphQLError) {
-                    // Re-throw GraphQL errors (like authorization failures)
-                    throw error;
-                }
-
                 // Log the actual error for debugging (will appear in Vercel logs)
                 console.error('Error in updateLoggableEvent:', error);
                 throw new Error('Internal server error');
@@ -314,56 +308,44 @@ const resolvers: Resolvers = {
         addTimestampToEvent: async (_, { input }, { prisma }) => {
             // Auth and ownership checks handled by @requireOwner directive
             try {
-                const validatedInput = AddTimestampToEventSchema.parse(input);
-
                 // Get the current event to retrieve existing timestamps
                 // Auth directive already validated the event exists and user owns it
                 const currentEvent = await prisma.loggableEvent.findUnique({
-                    where: { id: validatedInput.id },
+                    where: { id: input.id },
                     select: { timestamps: true }
                 });
 
                 invariant(currentEvent, 'Event should exist after auth directive validation');
 
                 // Add the new timestamp to existing ones
-                const updatedTimestamps = [...currentEvent.timestamps, validatedInput.timestamp];
+                const updatedTimestamps = [...currentEvent.timestamps, new Date(input.timestamp)];
 
                 return await updateLoggableEventHelper({
-                    eventId: validatedInput.id,
+                    eventId: input.id,
                     updateData: { timestamps: updatedTimestamps },
                     prisma
                 });
             } catch (error) {
-                if (error instanceof z.ZodError) {
-                    return {
-                        loggableEvent: null,
-                        errors: formatZodError(error)
-                    };
-                }
-
-                return {
-                    loggableEvent: null,
-                    errors: [{ code: 'INTERNAL_ERROR', field: null, message: 'Something went wrong' }]
-                };
+                // Log the actual error for debugging (will appear in Vercel logs)
+                console.error('Error in addTimestampToEvent:', error);
+                throw new Error('Internal server error');
             }
         },
 
         removeTimestampFromEvent: async (_, { input }, { prisma }) => {
             // Auth and ownership checks handled by @requireOwner directive
             try {
-                const validatedInput = RemoveTimestampFromEventSchema.parse(input);
-
                 // Get the current event to retrieve existing timestamps
                 // Auth directive already validated the event exists and user owns it
                 const currentEvent = await prisma.loggableEvent.findUnique({
-                    where: { id: validatedInput.id },
+                    where: { id: input.id },
                     select: { timestamps: true }
                 });
 
                 invariant(currentEvent, 'Event should exist after auth directive validation');
 
                 // Check if the timestamp exists before removing
-                const timestampToRemove = validatedInput.timestamp.getTime();
+                const timestampToRemove = new Date(input.timestamp).getTime();
                 const timestampExists = currentEvent.timestamps.some(
                     (timestamp: Date) => timestamp.getTime() === timestampToRemove
                 );
@@ -381,22 +363,14 @@ const resolvers: Resolvers = {
                 );
 
                 return await updateLoggableEventHelper({
-                    eventId: validatedInput.id,
+                    eventId: input.id,
                     updateData: { timestamps: updatedTimestamps },
                     prisma
                 });
             } catch (error) {
-                if (error instanceof z.ZodError) {
-                    return {
-                        loggableEvent: null,
-                        errors: formatZodError(error)
-                    };
-                }
-
-                return {
-                    loggableEvent: null,
-                    errors: [{ code: 'INTERNAL_ERROR', field: null, message: 'Something went wrong' }]
-                };
+                // Log the actual error for debugging (will appear in Vercel logs)
+                console.error('Error in removeTimestampFromEvent:', error);
+                throw new Error('Internal server error');
             }
         }
     },
