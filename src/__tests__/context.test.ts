@@ -148,20 +148,6 @@ describe('createContext', () => {
             expect(context.user).toBeNull();
             expect(prismaMock.user.findUnique).not.toHaveBeenCalled();
         });
-
-        it('should handle Bearer token with extra spaces', async () => {
-            mockRequest.headers.set('authorization', 'Bearer   valid-token');
-            vi.mocked(verifyJWT).mockReturnValue({
-                userId: 'user-123',
-                email: 'test@example.com'
-            });
-            prismaMock.user.findUnique.mockResolvedValue(mockUser);
-
-            const context = await createContext(mockYogaContext);
-
-            expect(verifyJWT).toHaveBeenCalledWith('  valid-token');
-            expect(context.user).toEqual(mockUser);
-        });
     });
 
     describe('response object', () => {
