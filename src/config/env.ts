@@ -15,9 +15,9 @@ const envSchema = z.object({
     // Environment
     NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
     // Access token expiration time in seconds
-    ACCESS_TOKEN_EXPIRES_IN_SECONDS: z.coerce.number().min(1),
+    ACCESS_TOKEN_EXPIRES_IN_SECONDS: z.coerce.number().min(1).default(900),
     // Refresh token expiration time in days
-    REFRESH_TOKEN_EXPIRES_IN_DAYS: z.coerce.number().min(1)
+    REFRESH_TOKEN_EXPIRES_IN_DAYS: z.coerce.number().min(1).default(30)
 });
 
 export const env = envSchema.parse(process.env);
