@@ -26,7 +26,8 @@ export async function createContext({ request, ...rest }: YogaInitialContext): P
     const response = { headers: responseHeaders };
 
     // Extract access token from Authorization header
-    const token = request.headers.get('authorization')?.replace('Bearer ', '');
+    const authHeader = request.headers.get('authorization');
+    const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.replace('Bearer ', '') : undefined;
 
     if (!token) {
         return {

@@ -165,9 +165,11 @@ describe('createContext', () => {
         it('should handle authorization header without Bearer prefix', async () => {
             mockRequest.headers.set('authorization', 'just-a-token');
 
-            await createContext(mockYogaContext);
+            const context = await createContext(mockYogaContext);
 
-            expect(verifyJWT).toHaveBeenCalledWith('just-a-token');
+            // Token without Bearer prefix should not be processed
+            expect(verifyJWT).not.toHaveBeenCalled();
+            expect(context.user).toBeNull();
         });
 
         it('should handle case-insensitive Bearer prefix', async () => {
@@ -177,9 +179,27 @@ describe('createContext', () => {
                 email: 'test@example.com'
             });
 
-            await createContext(mockYogaContext);
+            const context = await createContext(mockYogaContext);
 
-            expect(verifyJWT).toHaveBeenCalledWith('bearer valid-token');
+            // Case-insensitive 'bearer' should not be processed (must be 'Bearer')
+            expect(verifyJWT).not.toHaveBeenCalled();
+            expect(context.user).toBeNull();
+        });
+
+        it('should properly extract token with Bearer prefix', async () => {
+            mockRequest.headers.set('authorization', 'Bearer valid-token');
+            const mockUser = createMockUserWithRelations({ id: 'user-123' });
+            vi.mocked(verifyJWT).mockReturnValue({
+                userId: 'user-123',
+                email: 'test@example.com'
+            });
+            prismaMock.user.findUnique.mockResolvedValue(mockUser);
+
+            const context = await createContext(mockYogaContext);
+
+            // Should extract token without the Bearer prefix
+            expect(verifyJWT).toHaveBeenCalledWith('valid-token');
+            expect(context.user).toEqual(mockUser);
         });
 
         it('should handle database errors gracefully', async () => {
