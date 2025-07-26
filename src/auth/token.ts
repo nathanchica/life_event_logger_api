@@ -9,7 +9,8 @@ import { env } from '../config/env.js';
 const client = new OAuth2Client(env.GOOGLE_CLIENT_ID);
 
 // Token configuration
-const REFRESH_TOKEN_EXPIRES_IN_MS = env.REFRESH_TOKEN_EXPIRES_IN_DAYS * 24 * 60 * 60 * 1000; // Convert days to milliseconds
+export const MILLISECONDS_IN_DAY = 24 * 60 * 60 * 1000;
+const REFRESH_TOKEN_EXPIRES_IN_MS = env.REFRESH_TOKEN_EXPIRES_IN_DAYS * MILLISECONDS_IN_DAY;
 
 export interface TokenPayload {
     userId: string;

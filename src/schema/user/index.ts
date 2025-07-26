@@ -11,7 +11,8 @@ import {
     revokeRefreshToken,
     rotateRefreshToken,
     validateRefreshToken,
-    verifyGoogleToken
+    verifyGoogleToken,
+    MILLISECONDS_IN_DAY
 } from '../../auth/token.js';
 import { env } from '../../config/env.js';
 import { ClientType, Resolvers } from '../../generated/graphql.js';
@@ -40,7 +41,7 @@ const COOKIE_OPTIONS = {
     httpOnly: true,
     secure: env.NODE_ENV === 'production',
     sameSite: 'lax' as const,
-    maxAge: env.REFRESH_TOKEN_EXPIRES_IN_DAYS * 24 * 60 * 60 * 1000, // Convert days to seconds then to ms
+    maxAge: env.REFRESH_TOKEN_EXPIRES_IN_DAYS * MILLISECONDS_IN_DAY,
     path: '/'
 };
 

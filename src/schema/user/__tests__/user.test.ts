@@ -21,16 +21,20 @@ import { createMockLoggableEventWithLabels } from '../../loggableEvent/__mocks__
 import { createMockUser, createMockUserWithRelations } from '../__mocks__/user.js';
 
 // Mock the auth token module
-vi.mock('../../../auth/token.js', () => ({
-    verifyGoogleToken: vi.fn(),
-    generateJWT: vi.fn(),
-    generateAccessToken: vi.fn(),
-    createRefreshToken: vi.fn(),
-    validateRefreshToken: vi.fn(),
-    rotateRefreshToken: vi.fn(),
-    revokeRefreshToken: vi.fn(),
-    revokeAllUserTokens: vi.fn()
-}));
+vi.mock('../../../auth/token.js', async () => {
+    const originalModule = await vi.importActual<typeof import('../../../auth/token.js')>('../../../auth/token.js');
+    return {
+        ...originalModule,
+        verifyGoogleToken: vi.fn(),
+        generateJWT: vi.fn(),
+        generateAccessToken: vi.fn(),
+        createRefreshToken: vi.fn(),
+        validateRefreshToken: vi.fn(),
+        rotateRefreshToken: vi.fn(),
+        revokeRefreshToken: vi.fn(),
+        revokeAllUserTokens: vi.fn()
+    };
+});
 
 // Mock cookie serialization
 vi.mock('cookie', () => ({
