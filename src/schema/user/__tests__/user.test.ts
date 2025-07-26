@@ -10,8 +10,7 @@ import {
     validateRefreshToken,
     rotateRefreshToken,
     revokeRefreshToken,
-    revokeAllUserTokens,
-    extractTokenMetadata
+    revokeAllUserTokens
 } from '../../../auth/token.js';
 import { ClientType } from '../../../generated/graphql.js';
 import { createTestClient, TestGraphQLClient } from '../../../mocks/client.js';
@@ -30,8 +29,7 @@ vi.mock('../../../auth/token.js', () => ({
     validateRefreshToken: vi.fn(),
     rotateRefreshToken: vi.fn(),
     revokeRefreshToken: vi.fn(),
-    revokeAllUserTokens: vi.fn(),
-    extractTokenMetadata: vi.fn()
+    revokeAllUserTokens: vi.fn()
 }));
 
 // Mock cookie serialization
@@ -152,7 +150,6 @@ describe('User GraphQL', () => {
             // Mock JWT generation
             vi.mocked(generateJWT).mockReturnValue('jwt-token-123');
             vi.mocked(generateAccessToken).mockReturnValue('access-token-123');
-            vi.mocked(extractTokenMetadata).mockReturnValue({ userAgent: 'mock-user-agent', ipAddress: '127.0.0.1' });
             vi.mocked(createRefreshToken).mockResolvedValue('refresh-token-123');
             vi.mocked(serialize).mockReturnValue('refreshToken=refresh-token-123; HttpOnly');
 
@@ -226,7 +223,6 @@ describe('User GraphQL', () => {
             // Mock JWT generation
             vi.mocked(generateJWT).mockReturnValue('jwt-token-123');
             vi.mocked(generateAccessToken).mockReturnValue('access-token-123');
-            vi.mocked(extractTokenMetadata).mockReturnValue({ userAgent: 'mobile', ipAddress: '127.0.0.1' });
             vi.mocked(createRefreshToken).mockResolvedValue('refresh-token-123');
 
             const { mockContext, headerSetSpy } = createMockContextWithSpy({ user: null, prisma: prismaMock });
@@ -283,7 +279,6 @@ describe('User GraphQL', () => {
             // Mock JWT generation
             vi.mocked(generateJWT).mockReturnValue('jwt-token-456');
             vi.mocked(generateAccessToken).mockReturnValue('access-token-456');
-            vi.mocked(extractTokenMetadata).mockReturnValue({ userAgent: 'test', ipAddress: '127.0.0.1' });
             vi.mocked(createRefreshToken).mockResolvedValue('refresh-token-456');
             vi.mocked(serialize).mockReturnValue('refreshToken=refresh-token-456; HttpOnly');
 
@@ -473,7 +468,6 @@ describe('User GraphQL', () => {
 
             // Mock token generation
             vi.mocked(generateAccessToken).mockReturnValue('new-access-token');
-            vi.mocked(extractTokenMetadata).mockReturnValue({ userAgent: 'test', ipAddress: '127.0.0.1' });
             vi.mocked(rotateRefreshToken).mockResolvedValue('new-refresh-token');
             vi.mocked(serialize).mockReturnValue('refreshToken=new-refresh-token; HttpOnly');
 
@@ -521,7 +515,6 @@ describe('User GraphQL', () => {
 
             // Mock token generation
             vi.mocked(generateAccessToken).mockReturnValue('new-access-token');
-            vi.mocked(extractTokenMetadata).mockReturnValue({ userAgent: 'mobile', ipAddress: '127.0.0.1' });
             vi.mocked(rotateRefreshToken).mockResolvedValue('new-refresh-token');
 
             const { mockContext, headerSetSpy } = createMockContextWithSpy({ user: null, prisma: prismaMock });
