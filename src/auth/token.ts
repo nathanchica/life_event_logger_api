@@ -26,12 +26,6 @@ export interface RefreshTokenData {
     tokenId: string;
 }
 
-export interface RequestWithHeaders {
-    headers: {
-        get: (name: string) => string | null;
-    };
-}
-
 export async function verifyGoogleToken(token: string) {
     try {
         const ticket = await client.verifyIdToken({
@@ -165,14 +159,4 @@ export async function revokeAllUserTokens(prisma: PrismaClient, userId: string):
     await prisma.refreshToken.deleteMany({
         where: { userId }
     });
-}
-
-export function extractTokenMetadata(request: RequestWithHeaders): TokenMetadata {
-    return {
-        userAgent: request.headers.get('user-agent') || undefined,
-        ipAddress:
-            request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-            request.headers.get('x-real-ip') ||
-            undefined
-    };
 }
